@@ -1,0 +1,1 @@
+pyinstaller --onefile quick_match.py
