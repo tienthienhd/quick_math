@@ -1,3 +1,4 @@
+from io import BytesIO
 from tkinter import *
 import time
 import random
@@ -44,6 +45,7 @@ thoigian['validatecommand'] = (thoigian.register(testVal), '%P', '%d')
 thoigian.grid(column=1, row=2)
 
 selected = IntVar()
+selected.set(1)
 rad1 = Radiobutton(window, text='Phep cong +', value=1, variable=selected)
 rad2 = Radiobutton(window, text='Phep +-', value=2, variable=selected)
 rad3 = Radiobutton(window, text='phep nhan *', value=3, variable=selected)
@@ -52,6 +54,17 @@ rad1.grid(column=2, row=0)
 rad2.grid(column=2, row=1)
 rad3.grid(column=2, row=2)
 rad4.grid(column=2, row=3)
+
+
+show_read_number = IntVar()
+show_read_number.set(1)
+rad_show = Radiobutton(window, text='Hien thi so', value=1, variable=show_read_number)
+rad_show.grid(column=3, row=0)
+rad_read = Radiobutton(window, text='Doc so', value=2, variable=show_read_number)
+rad_read.grid(column=3, row=1)
+rad_show_read = Radiobutton(window, text='Hien thi so va Doc so', value=3, variable=show_read_number)
+rad_show_read.grid(column=3, row=2)
+
 
 frame = Frame(window)
 frame.grid(column=1, row=12)
@@ -90,15 +103,18 @@ def get_random_leter():
 
 tiles_letter, kq, current_n = None, None, 0
 
+
 def read_number(number: int):
     audio = gTTS(text=str(number), lang="en", slow=False)
-    audio.save("number.mp3")
+    mp3_file_object = BytesIO()
+    audio.write_to_fp(mp3_file_object)
 
     mixer.init()
-    mixer.music.load('number.mp3')
+    mp3_file_object.seek(0)
+    mixer.music.load(mp3_file_object)
     mixer.music.play()
-    while mixer.music.get_busy():  # wait for music to finish playing
-        time.sleep(0.5)
+    # while mixer.music.get_busy():  # wait for music to finish playing
+    #     time.sleep(0.5)
 
 
 def show():
@@ -115,8 +131,13 @@ def show():
             return
 
         rand = random.choice(tiles_letter)
-        read_number(rand)
-        tile_frame.config(text=f"{rand}", fg="black", font=("Times", "100", "bold"))
+        if show_read_number.get() == 1:
+            tile_frame.config(text=f"{rand}", fg="black", font=("Times", "100", "bold"))
+        elif show_read_number.get() == 2:
+            read_number(rand)
+        else:
+            read_number(rand)
+            tile_frame.config(text=f"{rand}", fg="black", font=("Times", "100", "bold"))
         window.after(math.trunc(k * 1000 / n), add_letter)
         tiles_letter.remove(rand)
 
